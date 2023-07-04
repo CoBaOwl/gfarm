@@ -1,0 +1,14 @@
+[{
+  "modid": "gfarm",
+  "name": "GFarm",
+  "description": "Farm for GregTechCEu.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "authorList": [
+      "CoBa31Rus",
+      "NightElite",
+      "ChatGPT"
+  ],
+  "credits": "",
+  "dependencies": ["codechickenlib", "gregtech"]
+}]
