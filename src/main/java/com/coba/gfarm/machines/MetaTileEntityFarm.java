@@ -8,6 +8,8 @@ import com.coba.gfarm.textures.GFarmTextures;
 import com.infinityraider.agricraft.api.v1.crop.IAgriCrop;
 import com.infinityraider.infinitylib.utility.WorldHelper;
 import gregtech.api.GTValues;
+import gregtech.api.capability.GregtechTileCapabilities;
+import gregtech.api.capability.IControllable;
 import gregtech.api.gui.GuiTextures;
 import gregtech.api.gui.ModularUI;
 import gregtech.api.gui.widgets.SlotWidget;
@@ -21,12 +23,15 @@ import net.minecraft.block.*;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.IPlantable;
+import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemStackHandler;
@@ -35,17 +40,19 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.Optional;
 
-public class MetaTileEntityFarm extends TieredMetaTileEntity {
+public class MetaTileEntityFarm extends TieredMetaTileEntity implements IControllable {
 
     private final int inventorySize;
     private final long energyAmountPerOperation;
     private static final int PLANT_CHECK_SIZE = 81;
     private final long harvestTicks;
     private final plantNavigator coodr;
+    private boolean workingEnabled;
 
     private final NonNullList<ItemStack> itemDropCrops;
     public MetaTileEntityFarm(ResourceLocation metaTileEntityId, int tier) {
         super(metaTileEntityId, tier);
+        this.workingEnabled = true;
         this.inventorySize = (tier + 1) * (tier + 1);
         this.energyAmountPerOperation = GTValues.V[tier];
         this.harvestTicks = 100L;
@@ -62,42 +69,44 @@ public class MetaTileEntityFarm extends TieredMetaTileEntity {
     @Override
     public void update() {
         super.update();
-
-        if (!getWorld().isRemote && (energyContainer.getEnergyStored() >= energyAmountPerOperation) && (getOffsetTimer() % harvestTicks == 0L) && this.itemDropCrops.isEmpty()) {
-            this.coodr.setCenter(this.getPos());
-            WorldServer world = (WorldServer) this.getWorld();
-            while (this.itemDropCrops.isEmpty() && !this.coodr.getPlantFinished()) {
-                NonNullList<BlockPos> plantPosition = this.coodr.plantIter();
-                for(BlockPos itr: plantPosition) {
-                    IBlockState plantState = world.getBlockState(itr);
-                    if ((plantState.getBlock() instanceof BlockCrops) && (((BlockCrops) plantState.getBlock()).isMaxAge(plantState))) {
-                        plantState.getBlock().getDrops(this.itemDropCrops, world, itr, plantState, 0);
-                        for (int i = 0; i < this.itemDropCrops.size(); i++)
-                            if (this.itemDropCrops.get(i).getItem() instanceof IPlantable) {
-                                this.itemDropCrops.remove(i);
-                                break;
-                            }
-                        world.setBlockState(itr, plantState.getBlock().getDefaultState());
-                    }
-                    if (Loader.isModLoaded("agricraft")) {
-                        final Optional<IAgriCrop> agriCrop = WorldHelper.getTile(world, itr, IAgriCrop.class);
-                        agriCrop.ifPresent(iAgriCrop -> iAgriCrop.onHarvest(this.itemDropCrops::add, null));
+        if (this.workingEnabled) {
+            if (!getWorld().isRemote && (energyContainer.getEnergyStored() >= energyAmountPerOperation) && (getOffsetTimer() % harvestTicks == 0L) && this.itemDropCrops.isEmpty()) {
+                this.coodr.setCenter(this.getPos());
+                WorldServer world = (WorldServer) this.getWorld();
+                while (this.itemDropCrops.isEmpty() && !this.coodr.getPlantFinished()) {
+                    NonNullList<BlockPos> plantPosition = this.coodr.plantIter();
+                    for(BlockPos itr: plantPosition) {
+                        IBlockState plantState = world.getBlockState(itr);
+                        if ((plantState.getBlock() instanceof BlockCrops) && (((BlockCrops) plantState.getBlock()).isMaxAge(plantState))) {
+                            plantState.getBlock().getDrops(this.itemDropCrops, world, itr, plantState, 0);
+                            for (int i = 0; i < this.itemDropCrops.size(); i++)
+                                if (this.itemDropCrops.get(i).getItem() instanceof IPlantable) {
+                                    this.itemDropCrops.remove(i);
+                                    break;
+                                }
+                            world.setBlockState(itr, plantState.getBlock().getDefaultState());
+                        }
+                        if (Loader.isModLoaded("agricraft")) {
+                            final Optional<IAgriCrop> agriCrop = WorldHelper.getTile(world, itr, IAgriCrop.class);
+                            agriCrop.ifPresent(iAgriCrop -> iAgriCrop.onHarvest(this.itemDropCrops::add, null));
+                        }
                     }
                 }
+                this.coodr.resetPlantFinished();
             }
-            this.coodr.resetPlantFinished();
-        }
 
-        if (!this.itemDropCrops.isEmpty() && GTTransferUtils.addItemsToItemHandler(exportItems, true, this.itemDropCrops)) {
-            GTTransferUtils.addItemsToItemHandler(exportItems, false, this.itemDropCrops);
-            this.itemDropCrops.clear();
-            energyContainer.removeEnergy(energyAmountPerOperation);
-        }
+            if (!this.itemDropCrops.isEmpty() && GTTransferUtils.addItemsToItemHandler(exportItems, true, this.itemDropCrops)) {
+                GTTransferUtils.addItemsToItemHandler(exportItems, false, this.itemDropCrops);
+                this.itemDropCrops.clear();
+                energyContainer.removeEnergy(energyAmountPerOperation);
+            }
 
 
-        if (!getWorld().isRemote && getOffsetTimer() % 5 == 0) {
-            pushItemsIntoNearbyHandlers(getFrontFacing());
+            if (!getWorld().isRemote && getOffsetTimer() % 5 == 0) {
+                pushItemsIntoNearbyHandlers(getFrontFacing());
+            }
         }
+
     }
 
     @Override
@@ -139,5 +148,48 @@ public class MetaTileEntityFarm extends TieredMetaTileEntity {
     @Override
     protected IItemHandlerModifiable createExportItemHandler() {
         return new ItemStackHandler(inventorySize);
+    }
+
+    @Override
+    public boolean isWorkingEnabled() { return workingEnabled; }
+
+    @Override
+    public void setWorkingEnabled(boolean isWorkingAllowed) {
+        this.workingEnabled = isWorkingAllowed;
+    }
+
+    @Override
+    public NBTTagCompound writeToNBT(NBTTagCompound data) {
+        super.writeToNBT(data);
+        data.setBoolean("workingEnabled", workingEnabled);
+        return data;
+    }
+
+    @Override
+    public void readFromNBT(NBTTagCompound data) {
+        super.readFromNBT(data);
+        if (data.hasKey("workingEnabled")) {
+            this.workingEnabled = data.getBoolean("workingEnabled");
+        }
+    }
+
+    @Override
+    public void writeInitialSyncData(PacketBuffer buf) {
+        super.writeInitialSyncData(buf);
+        buf.writeBoolean(workingEnabled);
+    }
+
+    @Override
+    public void receiveInitialSyncData(PacketBuffer buf) {
+        super.receiveInitialSyncData(buf);
+        this.workingEnabled = buf.readBoolean();
+    }
+
+    @Override
+    public <T> T getCapability(Capability<T> capability, EnumFacing side) {
+        if (capability == GregtechTileCapabilities.CAPABILITY_CONTROLLABLE) {
+            return GregtechTileCapabilities.CAPABILITY_CONTROLLABLE.cast(this);
+        }
+        return super.getCapability(capability, side);
     }
 }
