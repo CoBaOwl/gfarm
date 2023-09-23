@@ -45,7 +45,6 @@ public class MetaTileEntityFarm extends TieredMetaTileEntity implements IControl
 
     private final int inventorySize;
     private final long energyAmountPerOperation;
-    private static final int PLANT_CHECK_SIZE = 81;
     private final long harvestTicks;
     private final PlantNavigator coodr;
     private boolean workingEnabled;
@@ -58,7 +57,7 @@ public class MetaTileEntityFarm extends TieredMetaTileEntity implements IControl
         this.energyAmountPerOperation = (long) (GTValues.V[tier] * ConfigHandler.ENERGY_MULTIPLAYER);
         this.harvestTicks = 100L;
         this.itemDropCrops = NonNullList.create();
-        this.coodr = new PlantNavigator((int)Math.sqrt(PLANT_CHECK_SIZE), tier);
+        this.coodr = new PlantNavigator(ConfigHandler.PLANT_SIZE, tier);
         initializeInventory();
     }
 
@@ -71,35 +70,39 @@ public class MetaTileEntityFarm extends TieredMetaTileEntity implements IControl
     public void update() {
         super.update();
         if (this.workingEnabled) {
-            if (!getWorld().isRemote && (energyContainer.getEnergyStored() >= energyAmountPerOperation) && (getOffsetTimer() % harvestTicks == 0L) && this.itemDropCrops.isEmpty()) {
-                this.coodr.setCenter(this.getPos());
-                WorldServer world = (WorldServer) this.getWorld();
-                while (this.itemDropCrops.isEmpty() && !this.coodr.getPlantFinished()) {
-                    NonNullList<BlockPos> plantPosition = this.coodr.plantIter();
-                    for(BlockPos itr: plantPosition) {
-                        IBlockState plantState = world.getBlockState(itr);
-                        if ((plantState.getBlock() instanceof BlockCrops) && (((BlockCrops) plantState.getBlock()).isMaxAge(plantState))) {
-                            plantState.getBlock().getDrops(this.itemDropCrops, world, itr, plantState, 0);
-                            for (int i = 0; i < this.itemDropCrops.size(); i++)
-                                if (this.itemDropCrops.get(i).getItem() instanceof IPlantable) {
-                                    this.itemDropCrops.remove(i);
-                                    break;
-                                }
-                            world.setBlockState(itr, plantState.getBlock().getDefaultState());
-                        }
-                        if (Loader.isModLoaded("agricraft")) {
-                            final Optional<IAgriCrop> agriCrop = WorldHelper.getTile(world, itr, IAgriCrop.class);
-                            agriCrop.ifPresent(iAgriCrop -> iAgriCrop.onHarvest(this.itemDropCrops::add, null));
+            if ((getOffsetTimer() % harvestTicks == 0L)) {
+                if (!getWorld().isRemote && (energyContainer.getEnergyStored() >= energyAmountPerOperation) && this.itemDropCrops.isEmpty()) {
+                    this.coodr.setCenter(this.getPos());
+                    WorldServer world = (WorldServer) this.getWorld();
+                    while (this.itemDropCrops.isEmpty() && !this.coodr.getPlantFinished()) {
+                        NonNullList<BlockPos> plantPosition = this.coodr.plantIter();
+                        for(BlockPos itr: plantPosition) {
+                            IBlockState plantState = world.getBlockState(itr);
+                            if ((plantState.getBlock() instanceof BlockCrops) && (((BlockCrops) plantState.getBlock()).isMaxAge(plantState))) {
+                                plantState.getBlock().getDrops(this.itemDropCrops, world, itr, plantState, 0);
+                                for (int i = 0; i < this.itemDropCrops.size(); i++)
+                                    if (this.itemDropCrops.get(i).getItem() instanceof IPlantable) {
+                                        this.itemDropCrops.remove(i);
+                                        break;
+                                    }
+                                world.setBlockState(itr, plantState.getBlock().getDefaultState());
+                            }
+                            if (Loader.isModLoaded("agricraft")) {
+                                final Optional<IAgriCrop> agriCrop = WorldHelper.getTile(world, itr, IAgriCrop.class);
+                                agriCrop.ifPresent(iAgriCrop -> iAgriCrop.onHarvest(this.itemDropCrops::add, null));
+                            }
                         }
                     }
+                    this.coodr.resetPlantFinished();
                 }
-                this.coodr.resetPlantFinished();
-            }
 
-            if (!this.itemDropCrops.isEmpty() && GTTransferUtils.addItemsToItemHandler(exportItems, true, this.itemDropCrops)) {
-                GTTransferUtils.addItemsToItemHandler(exportItems, false, this.itemDropCrops);
-                this.itemDropCrops.clear();
-                energyContainer.removeEnergy(energyAmountPerOperation);
+                if (!this.itemDropCrops.isEmpty() && GTTransferUtils.addItemsToItemHandler(exportItems, true, this.itemDropCrops)) {
+                    GTTransferUtils.addItemsToItemHandler(exportItems, false, this.itemDropCrops);
+                    this.itemDropCrops.clear();
+                    energyContainer.removeEnergy(energyAmountPerOperation);
+                } else if (ConfigHandler.TAKE_ENERGY_FOR_CHECK_PLANT) {
+                    energyContainer.removeEnergy(energyAmountPerOperation);
+                }
             }
 
 
