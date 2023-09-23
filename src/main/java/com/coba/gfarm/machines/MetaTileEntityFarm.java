@@ -4,6 +4,8 @@ import codechicken.lib.render.CCRenderState;
 import codechicken.lib.render.pipeline.ColourMultiplier;
 import codechicken.lib.render.pipeline.IVertexOperation;
 import codechicken.lib.vec.Matrix4;
+import com.coba.gfarm.ConfigHandler;
+import com.coba.gfarm.logic.PlantNavigator;
 import com.coba.gfarm.textures.GFarmTextures;
 import com.infinityraider.agricraft.api.v1.crop.IAgriCrop;
 import com.infinityraider.infinitylib.utility.WorldHelper;
@@ -35,7 +37,6 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemStackHandler;
-import com.coba.gfarm.logic.plantNavigator;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.Optional;
@@ -46,7 +47,7 @@ public class MetaTileEntityFarm extends TieredMetaTileEntity implements IControl
     private final long energyAmountPerOperation;
     private static final int PLANT_CHECK_SIZE = 81;
     private final long harvestTicks;
-    private final plantNavigator coodr;
+    private final PlantNavigator coodr;
     private boolean workingEnabled;
 
     private final NonNullList<ItemStack> itemDropCrops;
@@ -54,10 +55,10 @@ public class MetaTileEntityFarm extends TieredMetaTileEntity implements IControl
         super(metaTileEntityId, tier);
         this.workingEnabled = true;
         this.inventorySize = (tier + 1) * (tier + 1);
-        this.energyAmountPerOperation = GTValues.V[tier];
+        this.energyAmountPerOperation = (long) (GTValues.V[tier] * ConfigHandler.ENERGY_MULTIPLAYER);
         this.harvestTicks = 100L;
         this.itemDropCrops = NonNullList.create();
-        this.coodr = new plantNavigator((int)Math.sqrt(PLANT_CHECK_SIZE), tier);
+        this.coodr = new PlantNavigator((int)Math.sqrt(PLANT_CHECK_SIZE), tier);
         initializeInventory();
     }
 

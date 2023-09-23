@@ -1,17 +1,20 @@
 package com.coba.gfarm.register;
 
+import com.coba.gfarm.ConfigHandler;
 import com.coba.gfarm.machines.MetaTileEntityFarm;
 import gregtech.api.GTValues;
 import gregtech.common.metatileentities.MetaTileEntities;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
 import static gregtech.loaders.recipe.CraftingComponent.*;
 import static gregtech.loaders.recipe.MetaTileEntityLoader.registerMachineRecipe;
 
-public class registery {
+public class Registry {
     public static final MetaTileEntityFarm[] FARM = new MetaTileEntityFarm[2];
 
-    public static void Init() {
+    public static void Init(FMLPreInitializationEvent event) {
+        ConfigHandler.registerConfig(event);
         FARM[0] = MetaTileEntities.registerMetaTileEntity(3000, new MetaTileEntityFarm(gregtechId("farm.lv"), 1));
         FARM[1] = MetaTileEntities.registerMetaTileEntity(3001, new MetaTileEntityFarm(gregtechId("farm.mv"), 2));
     }

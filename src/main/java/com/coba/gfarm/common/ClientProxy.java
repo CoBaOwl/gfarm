@@ -1,6 +1,7 @@
 package com.coba.gfarm.common;
 
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import com.coba.gfarm.textures.GFarmTextures;
 
@@ -8,9 +9,9 @@ import com.coba.gfarm.textures.GFarmTextures;
 public class ClientProxy extends CommonProxy  {
 
     @Override
-    public void preInit() {
-        super.preInit();
-        GFarmTextures.preInit();
+    public void preInit(FMLPreInitializationEvent event) {
+        super.preInit(event);
+        GFarmTextures.preInit(event);
     }
 
 }

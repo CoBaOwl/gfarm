@@ -3,14 +3,14 @@ package com.coba.gfarm.logic;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 
-public class plantNavigator {
+public class PlantNavigator {
     private final int plantSquareSize;
     private BlockPos plantCenter;
     private BlockPos currentPosition;
     boolean plantFinished;
     int sizeY;
 
-    public plantNavigator(int plantSquareSize, int tier) {
+    public PlantNavigator(int plantSquareSize, int tier) {
         this.plantFinished = false;
         this.plantSquareSize = plantSquareSize;
         this.sizeY = tier - 1;
