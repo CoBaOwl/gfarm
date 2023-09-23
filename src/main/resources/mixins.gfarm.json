@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "package": "com.coba.gfarm.mixins",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "MixinTileEntityCrop",
+    "MixinGrowthRequirement"
+  ],
+  "server": [
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8"
+}
