@@ -70,8 +70,8 @@ public class MetaTileEntityFarm extends TieredMetaTileEntity implements IControl
     public void update() {
         super.update();
         if (this.workingEnabled) {
-            if ((getOffsetTimer() % harvestTicks == 0L)) {
-                if (!getWorld().isRemote && (energyContainer.getEnergyStored() >= energyAmountPerOperation) && this.itemDropCrops.isEmpty()) {
+            if (!getWorld().isRemote && (getOffsetTimer() % harvestTicks == 0L) && (energyContainer.getEnergyStored() >= energyAmountPerOperation)) {
+                if (this.itemDropCrops.isEmpty()) {
                     this.coodr.setCenter(this.getPos());
                     WorldServer world = (WorldServer) this.getWorld();
                     while (this.itemDropCrops.isEmpty() && !this.coodr.getPlantFinished()) {
