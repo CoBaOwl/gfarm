@@ -4,7 +4,6 @@ import com.infinityraider.agricraft.api.v1.AgriApi;
 import com.infinityraider.agricraft.api.v1.misc.IAgriDisplayable;
 import com.infinityraider.agricraft.api.v1.seed.AgriSeed;
 import com.infinityraider.agricraft.items.ItemJournal;
-import com.infinityraider.agricraft.tiles.TileEntityCrop;
 import com.infinityraider.agricraft.tiles.analyzer.TileEntitySeedAnalyzer;
 import com.infinityraider.infinitylib.block.tile.TileEntityRotatableBase;
 import com.infinityraider.infinitylib.utility.inventory.IInventoryItemHandler;

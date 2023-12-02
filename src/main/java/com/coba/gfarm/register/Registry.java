@@ -15,8 +15,8 @@ public class Registry {
 
     public static void Init(FMLPreInitializationEvent event) {
         ConfigHandler.registerConfig(event);
-        FARM[0] = MetaTileEntities.registerMetaTileEntity(3000, new MetaTileEntityFarm(gregtechId("farm.lv"), 1));
-        FARM[1] = MetaTileEntities.registerMetaTileEntity(3001, new MetaTileEntityFarm(gregtechId("farm.mv"), 2));
+        FARM[0] = MetaTileEntities.registerMetaTileEntity(22520, new MetaTileEntityFarm(gregtechId("farm.lv"), 1));
+        FARM[1] = MetaTileEntities.registerMetaTileEntity(22521, new MetaTileEntityFarm(gregtechId("farm.mv"), 2));
     }
 
     private static ResourceLocation gregtechId(String name) {
