@@ -1,5 +1,8 @@
 package com.coba.gfarm.common;
 
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.item.Item;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -14,4 +17,7 @@ public class ClientProxy extends CommonProxy  {
         GFarmTextures.preInit(event);
     }
 
+    public void registerItemRender(Item item, int meta, String id) {
+        ModelLoader.setCustomModelResourceLocation(item, meta, new ModelResourceLocation(item.getRegistryName(), id));
+    }
 }

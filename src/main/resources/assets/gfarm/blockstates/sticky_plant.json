@@ -1,0 +1,58 @@
+{
+  "forge_marker": 1,
+  "defaults": {
+    "model": "crop"
+  },
+  "variants": {
+    "age": {
+      "0": {
+        "textures": {
+          "cross": "gfarm:blocks/sticky_plant0",
+          "crop": "gfarm:blocks/sticky_plant0"
+        }
+      },
+      "1": {
+        "textures": {
+          "cross": "gfarm:blocks/sticky_plant1",
+          "crop": "gfarm:blocks/sticky_plant1"
+        }
+      },
+      "2": {
+        "textures": {
+          "cross": "gfarm:blocks/sticky_plant2",
+          "crop": "gfarm:blocks/sticky_plant2"
+        }
+      },
+      "3": {
+        "textures": {
+          "cross": "gfarm:blocks/sticky_plant3",
+          "crop": "gfarm:blocks/sticky_plant3"
+        }
+      },
+      "4": {
+        "textures": {
+          "cross": "gfarm:blocks/sticky_plant4",
+          "crop": "gfarm:blocks/sticky_plant4"
+        }
+      },
+      "5": {
+        "textures": {
+          "cross": "gfarm:blocks/sticky_plant5",
+          "crop": "gfarm:blocks/sticky_plant5"
+        }
+      },
+      "6": {
+        "textures": {
+          "cross": "gfarm:blocks/sticky_plant6",
+          "crop": "gfarm:blocks/sticky_plant6"
+        }
+      },
+      "7": {
+        "textures": {
+          "cross": "gfarm:blocks/sticky_plant7",
+          "crop": "gfarm:blocks/sticky_plant7"
+        }
+      }
+    }
+  }
+}

@@ -1,3 +1,6 @@
 
 gregtech.machine.farm.lv.name=Basic Farm
 gregtech.machine.farm.mv.name=Advanced Farm
+item.sticky.name=Sticky
+item.sticky_plant.name=Sticky Plant
+tile.sticky_plant.name=Sticky Plant
